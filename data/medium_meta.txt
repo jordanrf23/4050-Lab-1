@@ -1,0 +1,9 @@
+Network: medium
+Nodes: 10000
+Edges: 30000
+Average degree: 6.00
+
+Memory estimates:
+  Adjacency Matrix: 0.75 GB
+  Adjacency List: 1.53 MB
+  Ratio (Matrix/List): 500.0x

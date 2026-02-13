@@ -1,0 +1,9 @@
+Network: small
+Nodes: 961
+Edges: 2402
+Average degree: 5.00
+
+Memory estimates:
+  Adjacency Matrix: 0.01 GB
+  Adjacency List: 0.13 MB
+  Ratio (Matrix/List): 53.4x
