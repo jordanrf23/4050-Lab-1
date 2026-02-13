@@ -1,0 +1,81 @@
+Implement your own graph class
+class HybridGraph:
+    def __init__(self, num_nodes, density_threshold=0.1, block_size=100):
+        self.num_nodes = num_nodes
+        self.density_threshold = density_threshold
+        self.block_size = block_size
+        # Global adjacency list (default storage)
+        self.adj_list = {i: set() for i in range(num_nodes)}
+        # Block storage
+        self.blocks = {}  # block_id -> {"type": "list" or "matrix", "data": ...}
+
+    def _get_block_id(self, node):
+        return node // self.block_size
+
+    def add_edge(self, u, v):
+        self.adj_list[u].add(v)
+        self.adj_list[v].add(u)
+
+    def _compute_block_density(self, block_id):
+        start = block_id * self.block_size
+        end = min(start + self.block_size, self.num_nodes)
+        nodes = range(start, end)
+        possible_edges = (end - start) ** 2
+        actual_edges = 0
+        for u in nodes:
+            for v in self.adj_list[u]:
+                if start <= v < end:
+                    actual_edges += 1
+
+        return actual_edges / possible_edges if possible_edges > 0 else 0
+
+    def optimize_blocks(self):
+        total_blocks = (self.num_nodes + self.block_size - 1) // self.block_size
+
+        for block_id in range(total_blocks):
+            density = self._compute_block_density(block_id)
+
+            start = block_id * self.block_size
+            end = min(start + self.block_size, self.num_nodes)
+
+            if density >= self.density_threshold:
+                # Convert to matrix
+                size = end - start
+                matrix = [[0] * size for _ in range(size)]
+                for u in range(start, end):
+                    for v in self.adj_list[u]:
+                        if start <= v < end:
+                            matrix[u - start][v - start] = 1
+                
+                self.blocks[block_id] = {
+                    "type": "matrix",
+                    "data": matrix
+                }
+            else:
+                # Keep as adjacency list
+                block_list = {
+                    u: self.adj_list[u]
+                    for u in range(start, end)
+                }
+                self.blocks[block_id] = {
+                    "type": "list",
+                    "data": block_list
+                }
+    def has_edge(self, u, v):
+        block_id = self._get_block_id(u)
+        if block_id in self.blocks and self.blocks[block_id]["type"] == "matrix":
+            start = block_id * self.block_size
+            matrix = self.blocks[block_id]["data"]
+            return matrix[u - start][v - start] == 1
+        else:
+            return v in self.adj_list[u]
+    def get_neighbors(self, u):
+        block_id = self._get_block_id(u)
+
+        if block_id in self.blocks and self.blocks[block_id]["type"] == "matrix":
+            start = block_id * self.block_size
+            matrix = self.blocks[block_id]["data"]
+            row = matrix[u - start]
+            return [start + i for i, val in enumerate(row) if val == 1]
+        else: 
+return list(self.adj_list[u])
